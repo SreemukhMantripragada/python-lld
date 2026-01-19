@@ -58,8 +58,10 @@ class Rectangle:
 class Square(Rectangle):
     pass  # inherits resize(w,h) -> breaks square constraint
 ```
+
 #### Use ABC(abstract base classes): Conrtact-like boundaries are set 
-Common errors are making a base class instantiable but not used anywhere. 
+Common errors are making a base class instantiable but not used anywhere.   
+In this example just having a PayrollPolicy object would violate our code as it is nothing without a proper implementation, so make it an Interface. 
 ```python
 from abc import ABC, abstractmethod
 
@@ -70,6 +72,86 @@ class PayrollPolicy(ABC):
 class SalaryPolicy(PayrollPolicy):
     def __init__(self, weekly: int):
         self.weekly = weekly
+
     def calculate(self) -> int:
         return self.weekly
 ```
+#### Duck-typing
+So our main idea is to prioritise *behaviour* over *ancestory*.   
+If the code somewhere calls .calculate(), any object fulfilling .calculate() and returning something as expected must be allowed.   
+So contracts like interfaces solve this issue. We dont have to worry about the internal implementation, continuing on the above example, any implemented policy object can be used to .calculate().  
+This is another way to achieve *polymorphism* besides *inheritence*.    
+Idea: If it looks like a duck and quacks like a duck, it must be a duck.
+```python
+def run_payroll(policy) -> int:
+    return policy.calculate()  # duck-typed contract
+```
+
+#### Composition: "HAS A"+ methods are delegated
+*Delegation* is passing on a task to another object rather than handling the request itself or inheriting from parent.   
+This keeps policies or strategies out of the responsibility of the class they are given to.   
+For example, an employee need not handle his own policy to get paid. There can be different policies which all satisfy a policy interface and the empolyee can *have* a policy object and its functionality is delegated away from the class.   
+This avoids creating a whole variety of subclasses, and code reuse is easier.
+
+#### mixins in python:
+Mixins are additional functionalities added to similar classes that help us add them like a feature using multiple inheritance rather than creating a big hierarchy.  
+For example:
+```python
+class Shape:
+    def __init__(self, x, y):
+        # X and Y coordinates
+        self.x, self.y = x, y
+    def serialize(self):
+        print(",".join([f"{k}-{v}" for k,v in self.__dict__.items()]))
+
+class Rectangle(Shape):
+    def __init__(self, x, y, height, width):
+        super().__init__(x, y)
+        self.height = height
+        self.width = width
+
+class Circle(Shape):
+    def __init__(self, x, y, radius):
+        super().__init__(x, y)
+        self.radius = radius
+
+c = Circle(0, 0, 10)
+r = Rectangle(1, 3, 4, 5)
+c.serialize() # x-0,y-0,radius-10
+r.serialize() # x-1,y-3,height-4,width-5
+```
+Here the base class is having shared responsibilities, so if we must use inheritance, we must create a separate *Serializable* class and make *Shape* inherit from that.   
+If we have another class and subclass setup for which we need serialisation of objects, we must define the base class to extend form *Serializable* which leads to long chains of inheritence.  
+For small feature additions *mixins* are great, we cab create another class and use *multiple inheritence* which gives the *serialize()* method when inherited.
+```python
+class Shape:
+    def __init__(self, x, y):
+        # X and Y coordinates
+        self.x, self.y = x, y
+
+class Serializer:    
+    def serialize(self):
+        print(",".join([f"{k}-{v}" for k,v in self.__dict__.items()]))
+
+class Rectangle(Shape, Serializer):
+    def __init__(self, x, y, height, width):
+        super().__init__(x, y)
+        self.height = height
+        self.width = width
+
+class Circle(Shape, Serializer):
+    def __init__(self, x, y, radius):
+        super().__init__(x, y)
+        self.radius = radius
+
+c = Circle(0, 0, 10)
+r = Rectangle(1, 3, 4, 5)
+c.serialize()
+r.serialize()
+```
+This is a better implementation. A mixin is a class with a single purpose to add functionality to other classes.   
+Uses: Loggers, Serializers, Comparators
+
+#### MRO and Multiple inheritence:
+Also we want to avoid Multiple inheritence to avoid diamond inheritence or mro calling wrong constructors. There can be conflicting __init__ signatures.   
+So, we must choose composition and if needed mixins for isolated features. 

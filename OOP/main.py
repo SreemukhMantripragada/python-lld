@@ -96,3 +96,31 @@ mgr1.print_emps()
 print(isinstance(dev1, Employee)) #True
 print(issubclass(Developer, Employee)) #True
 print(issubclass(Developer, Manager)) # False
+
+
+
+
+class Shape:
+    def __init__(self, x, y):
+        # X and Y coordinates
+        self.x, self.y = x, y
+
+class Serializer:    
+    def serialize(self):
+        print(",".join([f"{k}-{v}" for k,v in self.__dict__.items()]))
+
+class Rectangle(Shape, Serializer):
+    def __init__(self, x, y, height, width):
+        super().__init__(x, y)
+        self.height = height
+        self.width = width
+
+class Circle(Shape, Serializer):
+    def __init__(self, x, y, radius):
+        super().__init__(x, y)
+        self.radius = radius
+
+c = Circle(0, 0, 10)
+r = Rectangle(1, 3, 4, 5)
+c.serialize()
+r.serialize()
