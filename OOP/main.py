@@ -124,3 +124,23 @@ c = Circle(0, 0, 10)
 r = Rectangle(1, 3, 4, 5)
 c.serialize()
 r.serialize()
+
+
+from dataclasses import dataclass
+import inspect
+
+@dataclass(frozen=True,order=True)
+class Comment:
+    id: int
+    text: str
+
+comment = Comment(1, "comment")
+print(comment)
+print(*inspect.getmembers(Comment, inspect.isfunction))
+
+from dataclasses import dataclass, field
+@dataclass(frozen=True,order=True)
+class Comment:
+    id: int
+    text: str = ""
+    replies: list[int] = field(default_factory=list)
