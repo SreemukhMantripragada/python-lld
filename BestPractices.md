@@ -21,4 +21,4 @@ Usecases:
 2. Flexible, we can also swap parts.   
 
 There are tradeoffs based on our problem statement, most times we dont need to over engineer.  
-![alt text](docs/image.png)
+![alt text](/Python-LLD/docs/image.png)
